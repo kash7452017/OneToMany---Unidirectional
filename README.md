@@ -149,3 +149,158 @@ public class Course {
 	}
 }
 ```
+**以下範例為演示添加新課程以及為課程添加評論說明**
+```
+public class CreateCoursesAndReviewsDemo {
+
+	public static void main(String[] args) {
+		
+		// create session factory
+		SessionFactory factory = new Configuration()
+				.configure("hibernate.cfg.xml")
+				.addAnnotatedClass(Instructor.class)
+				.addAnnotatedClass(InstructorDetail.class)
+				.addAnnotatedClass(Course.class)
+				.addAnnotatedClass(Review.class)
+				.buildSessionFactory();
+		
+		// create session
+		Session session = factory.getCurrentSession();
+		
+		try {  											
+            // start transaction
+            session.beginTransaction();
+            
+            // create a course
+            Course tempCourse = new Course("Pacman - How To Score One Million Points");
+            
+            // add some reviews
+            tempCourse.addReview(new Review("Great course ... loved it!"));
+            tempCourse.addReview(new Review("Cool course, job well done"));
+            tempCourse.addReview(new Review("What a dumb course, you are an idiot!"));
+            
+            // save the course ... and leverage the cascade all
+            System.out.println("Saving the course");
+            System.out.println(tempCourse);
+            System.out.println(tempCourse.getReview());
+            session.save(tempCourse);
+            
+            // commit transaction
+            session.getTransaction().commit();
+ 
+            System.out.println("Done!");
+            
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+        	
+        	// add clean up code
+        	session.close();
+        	
+            factory.close();
+        }
+	}
+}
+```
+**以下演示如何獲取資料庫中的Course與Reviews資料，另外，由於FetchType.LAZY運作方式，當有需要時才會向資料庫撈取資料**
+```
+public class GetCoursesAndReviewsDemo {
+
+	public static void main(String[] args) {
+		
+		// create session factory
+		SessionFactory factory = new Configuration()
+				.configure("hibernate.cfg.xml")
+				.addAnnotatedClass(Instructor.class)
+				.addAnnotatedClass(InstructorDetail.class)
+				.addAnnotatedClass(Course.class)
+				.addAnnotatedClass(Review.class)
+				.buildSessionFactory();
+		
+		// create session
+		Session session = factory.getCurrentSession();
+		
+		try {  											
+            // start transaction
+            session.beginTransaction();
+            
+            // get the course
+            int theId = 10;
+            Course tempCourse = session.get(Course.class, theId);
+            
+            // print the course
+            System.out.println(tempCourse);
+            
+            // print the course reviews
+            System.out.println(tempCourse.getReview());
+            
+            // commit transaction
+            session.getTransaction().commit();
+ 
+            System.out.println("Done!");
+            
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+        	
+        	// add clean up code
+        	session.close();
+        	
+            factory.close();
+        }
+	}
+}
+```
+**以下範例演示如何從資料庫刪除課程，同時由於級聯關係，刪除課程會同步刪除相關評論資料**
+```
+public class DeleteCourseAndReviewsDemo {
+
+	public static void main(String[] args) {
+		
+		// create session factory
+		SessionFactory factory = new Configuration()
+				.configure("hibernate.cfg.xml")
+				.addAnnotatedClass(Instructor.class)
+				.addAnnotatedClass(InstructorDetail.class)
+				.addAnnotatedClass(Course.class)
+				.addAnnotatedClass(Review.class)
+				.buildSessionFactory();
+		
+		// create session
+		Session session = factory.getCurrentSession();
+		
+		try {  											
+            // start transaction
+            session.beginTransaction();
+            
+            // get the course
+            int theId = 10;
+            Course tempCourse = session.get(Course.class, theId);
+            
+            // print the course
+            System.out.println("Deleting the course ...");
+            System.out.println(tempCourse);
+            
+            // print the course reviews
+            System.out.println(tempCourse.getReview());
+            
+            // delete the course
+            session.delete(tempCourse);
+            
+            // commit transaction
+            session.getTransaction().commit();
+ 
+            System.out.println("Done!");
+            
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+        	
+        	// add clean up code
+        	session.close();
+        	
+            factory.close();
+        }
+	}
+}
+```
